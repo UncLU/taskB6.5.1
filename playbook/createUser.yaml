@@ -1,0 +1,36 @@
+---
+- name: Создание пользователя и задание SSH-ключа
+  hosts: ans
+  become: yes
+
+  vars:
+    ssh_public_key: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQD...YOUR_PUBLIC_KEY... user1@examle.com"
+
+  tasks:
+    - name: Создание пользователя
+      user:
+        name: user1
+        state: present
+        create_home: yes
+
+    - name: Генерация SSH-ключа
+      command: ssh-keygen -t rsa -b 4096 -f /home/unclelu/tmp/user1_key/ -N ''      
+
+    - name: Шифрование ключа с помощью ansible-vault
+      command: ansible-vault encrypt /home/unclelu/tmp/user1_key/
+
+    - name: Копирование зашифрованного ключа на удаленную машину
+      copy:
+        src: /home/unclelu/tmp/user1_key/
+        dest: /home/user1/.ssh/id_rsa
+        owner: user1
+        group: user1
+        mode: '0600'
+
+    - name: Копирование открытого ключа на удаленную машину
+      copy:
+        content: "{{ ssh_public_key }}"
+        dest: /home/user1/.ssh/id_rsa.pub
+        owner: user1
+        group: user1
+        mode: '0644'

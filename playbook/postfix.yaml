@@ -1,0 +1,19 @@
+---
+- name: Установка или удаление почтового сервера Postfix
+  hosts: ans
+  become: yes
+
+  tasks:
+    - name: Установка Postfix
+      apt:
+        name: postfix
+        state: present
+      tags:
+        - init postfix
+
+    - name: Удаление Postfix
+      apt:
+        name: postfix
+        state: absent
+      tags:
+        - drop postfix
